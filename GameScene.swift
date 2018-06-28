@@ -22,7 +22,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
     
     // スコア
     var score = 0
-    
+    var scoreLabelNode:SKLabelNode!    // ←追加
+    var bestScoreLabelNode:SKLabelNode!    // ←追加
+    let userDefaults:UserDefaults = UserDefaults.standard    // 追加
+   
     // SKView上にシーンが表示されたときに呼ばれるメソッド
     override func didMove(to view: SKView) {
         
@@ -46,9 +49,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
         setupCloud()
         setupWall()
         setupBird()
+        setupScoreLabel()   // 追加
     }
     
-    
+    func setupScoreLabel() {
+        score = 0
+        scoreLabelNode = SKLabelNode()
+        scoreLabelNode.fontColor = UIColor.black
+        scoreLabelNode.position = CGPoint(x: 10, y: self.frame.size.height - 60)
+        scoreLabelNode.zPosition = 100 // 一番手前に表示する
+        scoreLabelNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
+        scoreLabelNode.text = "Score:\(score)"
+        self.addChild(scoreLabelNode)
+        
+        bestScoreLabelNode = SKLabelNode()
+        bestScoreLabelNode.fontColor = UIColor.black
+        bestScoreLabelNode.position = CGPoint(x: 10, y: self.frame.size.height - 90)
+        bestScoreLabelNode.zPosition = 100 // 一番手前に表示する
+        bestScoreLabelNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
+        
+        let bestScore = userDefaults.integer(forKey: "BEST")
+        bestScoreLabelNode.text = "Best Score:\(bestScore)"
+        self.addChild(bestScoreLabelNode)
+    }
+
     func setupGround() {
         // 地面の画像を読み込む
         let groundTexture = SKTexture(imageNamed: "ground")
@@ -276,6 +300,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
             // スコア用の物体と衝突した
             print("ScoreUp")
             score += 1
+            scoreLabelNode.text = "Score:\(score)"    // ←追加
+           
+            // ベストスコア更新か確認する --- ここから ---
+            var bestScore = userDefaults.integer(forKey: "BEST")
+            if score > bestScore {
+                bestScore = score
+                bestScoreLabelNode.text = "Best Score:\(bestScore)"    // ←追加
+                userDefaults.set(bestScore, forKey: "BEST")
+                userDefaults.synchronize()
+            } // --- ここまで追加---
+            
         } else {
             // 壁か地面と衝突した
             print("GameOver")

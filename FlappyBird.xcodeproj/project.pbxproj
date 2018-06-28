@@ -14,6 +14,7 @@
 		EAAC91DC20E4A0D7003A73DB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EAAC91DA20E4A0D7003A73DB /* LaunchScreen.storyboard */; };
 		EAAC91E720E4A0D8003A73DB /* FlappyBirdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAAC91E620E4A0D8003A73DB /* FlappyBirdTests.swift */; };
 		EAAC91F220E4A0D8003A73DB /* FlappyBirdUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAAC91F120E4A0D8003A73DB /* FlappyBirdUITests.swift */; };
+		EAAC920020E4A4DD003A73DB /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAAC91FF20E4A4DD003A73DB /* GameScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		EAAC91ED20E4A0D8003A73DB /* FlappyBirdUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlappyBirdUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAAC91F120E4A0D8003A73DB /* FlappyBirdUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlappyBirdUITests.swift; sourceTree = "<group>"; };
 		EAAC91F320E4A0D8003A73DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EAAC91FF20E4A4DD003A73DB /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 		EAAC91C520E4A0C6003A73DB = {
 			isa = PBXGroup;
 			children = (
+				EAAC91FF20E4A4DD003A73DB /* GameScene.swift */,
 				EAAC91D020E4A0C7003A73DB /* FlappyBird */,
 				EAAC91E520E4A0D8003A73DB /* FlappyBirdTests */,
 				EAAC91F020E4A0D8003A73DB /* FlappyBirdUITests */,
@@ -256,6 +259,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EAAC920020E4A4DD003A73DB /* GameScene.swift in Sources */,
 				EAAC91D420E4A0C7003A73DB /* ViewController.swift in Sources */,
 				EAAC91D220E4A0C7003A73DB /* AppDelegate.swift in Sources */,
 			);

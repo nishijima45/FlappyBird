@@ -13,13 +13,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
     var scrollNode:SKNode!
     var wallNode:SKNode!
     var bird:SKSpriteNode!
+    var apple:SKNode!
     
     // 衝突判定カテゴリー ↓追加
     let birdCategory: UInt32 = 1 << 0       // 0...00001
     let groundCategory: UInt32 = 1 << 1     // 0...00010
     let wallCategory: UInt32 = 1 << 2       // 0...00100
     let scoreCategory: UInt32 = 1 << 3      // 0...01000
-    
+    let appleCategory: UInt32 = 1 << 4       // 0...10000
     // スコア
     var score = 0
     var scoreLabelNode:SKLabelNode!    // ←追加
@@ -44,12 +45,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
         wallNode = SKNode()
         scrollNode.addChild(wallNode)
         
+        //りんご用のノード
+        //appleNode = SKNode()
+    //    scrollNode.addChild(appleNode)
+        
         // 各種スプライトを生成する処理をメソッドに分割
         setupGround()
         setupCloud()
         setupWall()
         setupBird()
-        setupScoreLabel()   // 追加
+        setupScoreLabel()
+        setupApple()
     }
     
     func setupScoreLabel() {
@@ -243,6 +249,47 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
         
         wallNode.run(repeatForeverAnimation)
     }
+    func setupApple() {
+        // りんごの画像を読み込む
+        let appleTexture = SKTexture(imageNamed: "apple")
+        appleTexture.filteringMode = .nearest
+        
+        // 必要な枚数を計算
+        let needAppleNumber = Int(self.frame.size.width / appleTexture.size().width) + 2
+        
+        // スクロールするアクションを作成
+        // 左方向に画像一枚分スクロールさせるアクション
+        let moveApple = SKAction.moveBy(x: -appleTexture.size().width , y: 0, duration: 20.0)
+        
+        // 元の位置に戻すアクション
+        let resetApple = SKAction.moveBy(x: appleTexture.size().width, y: 0, duration: 0.0)
+        
+        // 左にスクロール->元の位置->左にスクロールと無限に繰り替えるアクション
+        let repeatScrollApple = SKAction.repeatForever(SKAction.sequence([moveApple, resetApple]))
+        
+        // スプライトを配置する
+        for i in 0..<needAppleNumber {
+            let sprite = SKSpriteNode(texture: appleTexture)
+            sprite.zPosition = -30 // 壁より手間、　地面より奥
+            
+            // スプライトの表示する位置を指定する
+            sprite.position = CGPoint(
+                x: appleTexture.size().width * (CGFloat(i) + 0.5),
+                y: self.size.height - appleTexture.size().height * 0.5
+            )
+            
+            // スプライトにアニメーションを設定する
+            sprite.run(repeatScrollApple)
+            
+            // スプライトを追加する
+            scrollNode.addChild(sprite)
+        }
+    }
+    
+    
+    
+    
+    
     // 以下追加
     func setupBird() {
         // 鳥の画像を2種類読み込む

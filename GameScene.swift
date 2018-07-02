@@ -13,7 +13,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
     var scrollNode:SKNode!
     var wallNode:SKNode!
     var bird:SKSpriteNode!
-    var apple:SKNode!
+    var appleNode:SKNode!
     
     // 衝突判定カテゴリー ↓追加
     let birdCategory: UInt32 = 1 << 0       // 0...00001
@@ -46,8 +46,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
         scrollNode.addChild(wallNode)
         
         //りんご用のノード
-        //appleNode = SKNode()
-    //    scrollNode.addChild(appleNode)
+        appleNode = SKNode()
+        scrollNode.addChild(appleNode)
         
         // 各種スプライトを生成する処理をメソッドに分割
         setupGround()
@@ -198,7 +198,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
             let under_wall_y = CGFloat(under_wall_lowest_y + random_y)
             
             // キャラが通り抜ける隙間の長さ
-            let slit_length = self.frame.size.height / 6
+            let slit_length = self.frame.size.height / 3
             
             // 下側の壁を作成
             let under = SKSpriteNode(texture: wallTexture)
@@ -250,44 +250,92 @@ class GameScene: SKScene, SKPhysicsContactDelegate /* 追加 */ {
         wallNode.run(repeatForeverAnimation)
     }
     func setupApple() {
-        // りんごの画像を読み込む
+        // 壁の画像を読み込む
         let appleTexture = SKTexture(imageNamed: "apple")
-        appleTexture.filteringMode = .nearest
+        appleTexture.filteringMode = .linear
         
-        // 必要な枚数を計算
-        let needAppleNumber = Int(self.frame.size.width / appleTexture.size().width) + 2
+        // 移動する距離を計算
+        let movingDistance = CGFloat(self.frame.size.width + appleTexture.size().width)
         
-        // スクロールするアクションを作成
-        // 左方向に画像一枚分スクロールさせるアクション
-        let moveApple = SKAction.moveBy(x: -appleTexture.size().width , y: 0, duration: 20.0)
+        // 画面外まで移動するアクションを作成
+        let moveApple = SKAction.moveBy(x: -movingDistance, y: 0, duration:4.0)
         
-        // 元の位置に戻すアクション
-        let resetApple = SKAction.moveBy(x: appleTexture.size().width, y: 0, duration: 0.0)
+        // 自身を取り除くアクションを作成
+        let removeApple = SKAction.removeFromParent()
         
-        // 左にスクロール->元の位置->左にスクロールと無限に繰り替えるアクション
-        let repeatScrollApple = SKAction.repeatForever(SKAction.sequence([moveApple, resetApple]))
+        // 2つのアニメーションを順に実行するアクションを作成
+        let appleAnimation = SKAction.sequence([moveApple, removeApple])
         
-        // スプライトを配置する
-        for i in 0..<needAppleNumber {
-            let sprite = SKSpriteNode(texture: appleTexture)
-            sprite.zPosition = -30 // 壁より手間、　地面より奥
+        // 壁を生成するアクションを作成
+        let createAppleAnimation = SKAction.run({
+            // 壁関連のノードを乗せるノードを作成
+            let apple = SKNode()
+            apple.position = CGPoint(x: self.frame.size.width + appleTexture.size().width / 2, y: 0.0)
+            apple.zPosition = -30.0 // 壁より手前、地面より奥
             
-            // スプライトの表示する位置を指定する
-            sprite.position = CGPoint(
-                x: appleTexture.size().width * (CGFloat(i) + 0.5),
-                y: self.size.height - appleTexture.size().height * 0.5
-            )
+            // 画面のY軸の中央値
+            let center_y = self.frame.size.height / 2
+            // 壁のY座標を上下ランダムにさせるときの最大値
+            let random_y_range = self.frame.size.height / 4
+            // 下の壁のY軸の下限
+            let under_apple_lowest_y = UInt32( center_y - appleTexture.size().height / 2 -  random_y_range / 2)
+            // 1〜random_y_rangeまでのランダムな整数を生成
+            let random_y = arc4random_uniform( UInt32(random_y_range) )
+            // Y軸の下限にランダムな値を足して、下の壁のY座標を決定
+            let under_apple_y = CGFloat(under_apple_lowest_y + random_y)
             
-            // スプライトにアニメーションを設定する
-            sprite.run(repeatScrollApple)
+            // キャラが通り抜ける隙間の長さ
+            //let slit_length = self.frame.size.height / 3
             
-            // スプライトを追加する
-            scrollNode.addChild(sprite)
-        }
+            // 下側の壁を作成
+            let under = SKSpriteNode(texture: appleTexture)
+            under.position = CGPoint(x: 0.0, y: under_apple_y)
+            apple.addChild(under)
+            
+            // スプライトに物理演算を設定する
+            under.physicsBody = SKPhysicsBody(rectangleOf: appleTexture.size())    // ←追加
+            under.physicsBody?.categoryBitMask = self.appleCategory    // ←追加
+            
+            // 衝突の時に動かないように設定する いらない？
+            //under.physicsBody?.isDynamic = false    // ←追加
+            
+            // 上側の壁を作成
+            //let upper = SKSpriteNode(texture: wallTexture)
+            //upper.position = CGPoint(x: 0.0, y: under_wall_y + wallTexture.size().height + slit_length)
+            
+            // スプライトに物理演算を設定する
+            //upper.physicsBody = SKPhysicsBody(rectangleOf: wallTexture.size())
+            //upper.physicsBody?.categoryBitMask = self.wallCategory    // ←追加
+            
+            //upper.physicsBody?.isDynamic = false    // ←追加
+            
+            
+            //wall.addChild(upper)
+            
+            // スコアアップ用のノード --- ここから ---
+            //let scoreNode = SKNode()
+            //scoreNode.position = CGPoint(x: upper.size.width + self.bird.size.width / 2, y: self.frame.height / 2.0)
+            //scoreNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: upper.size.width, height: self.frame.size.height))
+            //scoreNode.physicsBody?.isDynamic = false
+            //scoreNode.physicsBody?.categoryBitMask = self.scoreCategory
+            //scoreNode.physicsBody?.contactTestBitMask = self.birdCategory
+            
+            //apple.addChild(scoreNode)
+            // --- ここまで追加 ---
+            
+            apple.run(appleAnimation)
+            
+            self.appleNode.addChild(apple)
+        })
+        
+        // 次の壁作成までの待ち時間のアクションを作成
+        let waitAnimation = SKAction.wait(forDuration: 2)
+        
+        // 壁を作成->待ち時間->壁を作成を無限に繰り替えるアクションを作成
+        let repeatForeverAnimation = SKAction.repeatForever(SKAction.sequence([createAppleAnimation, waitAnimation]))
+        
+        appleNode.run(repeatForeverAnimation)
     }
-    
-    
-    
     
     
     // 以下追加
